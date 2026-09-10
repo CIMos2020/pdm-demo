@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>PDM Prototype v0.2</title>
+<style>
+*{box-sizing:border-box}
+:root{
+ --bg:#f5f7fa;--panel:#fff;--text:#172033;--muted:#6b7280;--line:#e5e7eb;--nav:#111827;--nav2:#253044;
+}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Arial,sans-serif;background:var(--bg);color:var(--text)}
+input[type=radio].tab-radio{position:absolute;opacity:0;pointer-events:none}
+.app{min-height:100vh;display:grid;grid-template-columns:230px minmax(0,1fr)}
+aside{background:var(--nav);color:white;padding:22px 16px;min-height:100vh}
+.logo{font-size:27px;font-weight:900}.sub{font-size:11px;color:#9ca3af;margin:2px 0 22px}
+.project{padding:10px 12px;border:1px solid #374151;background:#1f2937;border-radius:10px;font-weight:800;margin-bottom:16px}
+.navlabel{display:block;padding:11px 12px;margin:4px 0;border-radius:8px;color:#cbd5e1;font-size:14px;cursor:pointer}
+.navlabel:hover{background:var(--nav2);color:white}
+main{padding:26px;min-width:0}
+.top{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:18px}
+.eyebrow{font-size:11px;color:var(--muted);letter-spacing:1.4px;font-weight:800}
+h1{margin:2px 0 0;font-size:30px}h2{font-size:18px;margin:0}h3{font-size:12px;color:var(--muted);letter-spacing:.8px;text-transform:uppercase}
+.badge{background:#fff3c4;color:#775600;padding:7px 11px;border-radius:999px;font-size:11px;font-weight:800;white-space:nowrap}
+.page{display:none}
+#tab-overview:checked~.app main #overview,
+#tab-gantt:checked~.app main #gantt,
+#tab-features:checked~.app main #features,
+#tab-validation:checked~.app main #validation,
+#tab-meetings:checked~.app main #meetings,
+#tab-issues:checked~.app main #issues{display:block}
+#tab-overview:checked~.app aside label[for=tab-overview],
+#tab-gantt:checked~.app aside label[for=tab-gantt],
+#tab-features:checked~.app aside label[for=tab-features],
+#tab-validation:checked~.app aside label[for=tab-validation],
+#tab-meetings:checked~.app aside label[for=tab-meetings],
+#tab-issues:checked~.app aside label[for=tab-issues]{background:var(--nav2);color:white}
+.cards{display:grid;grid-template-columns:repeat(5,minmax(120px,1fr));gap:12px;margin-bottom:14px}
+.card,.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+.card{padding:15px}.card span{display:block;color:var(--muted);font-size:11px}.card b{display:block;font-size:25px;margin:7px 0 2px}.card small{color:#9ca3af}
+.panel{padding:17px;margin-bottom:14px}
+.panelhead{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}.panelhead p{margin:4px 0 0;color:var(--muted);font-size:12px}
+.actionlabel{display:inline-block;background:#111827;color:white;padding:9px 12px;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer}
+.secondary{background:#eef2f7;color:var(--text)}
+.timeline-head{display:grid;grid-template-columns:155px repeat(5,1fr);font-size:10px;color:var(--muted);text-align:center;margin-bottom:4px}
+.grow{display:grid;grid-template-columns:155px 1fr;gap:10px;align-items:center;margin:10px 0}
+.glabel{font-size:13px;font-weight:800}.track{height:28px;background:#f1f3f6;border-radius:7px;position:relative;overflow:hidden;background-image:linear-gradient(to right,transparent 19.8%,#e5e7eb 20%,transparent 20.2%,transparent 39.8%,#e5e7eb 40%,transparent 40.2%,transparent 59.8%,#e5e7eb 60%,transparent 60.2%,transparent 79.8%,#e5e7eb 80%,transparent 80.2%)}
+.bar{position:absolute;top:4px;bottom:4px;background:#26354d;border-radius:6px}.bar span{position:absolute;right:6px;top:50%;transform:translateY(-50%);color:white;font-size:9px;white-space:nowrap}
+.split{display:grid;grid-template-columns:1.6fr 1fr;gap:14px}.cols{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.col{background:#f8fafc;border-radius:10px;padding:11px}.item{padding:8px 0;border-bottom:1px solid var(--line);font-size:13px}.item:last-child{border-bottom:0}.note{font-size:11px;color:var(--muted);margin-top:2px}
+table{width:100%;border-collapse:collapse;font-size:13px}th{text-align:left;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.5px;padding:9px;border-bottom:1px solid var(--line)}td{padding:10px 9px;border-bottom:1px solid #edf0f3;vertical-align:middle}
+select,input,textarea{font:inherit;border:1px solid #dfe3e8;border-radius:8px;padding:8px;background:white;max-width:100%}
+.pill{display:inline-block;padding:5px 8px;border-radius:999px;background:#eef2f7;font-size:10px;font-weight:800}.green{background:#e9f7ef;color:#25613f}.yellow{background:#fff3c4;color:#775600}.red{background:#fdeceb;color:#9b2c2c}
+.validation-lib{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}.checkcard{display:flex;align-items:center;gap:8px;background:#f8fafc;border:1px solid var(--line);padding:10px;border-radius:9px}
+.meeting{border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:12px}.mgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.mgrid>div{background:#f8fafc;border-radius:9px;padding:10px}
+details{border:1px solid var(--line);border-radius:10px;padding:10px;background:#fff;margin:8px 0}summary{cursor:pointer;font-weight:800}.detailbody{padding-top:10px;color:#475569}
+.mobile-tabs{display:none}
+@media(max-width:900px){
+ .app{grid-template-columns:1fr}.app aside{min-height:auto;padding:14px;position:sticky;top:0;z-index:5}
+ .logo,.sub,.project{display:none}
+ aside nav{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}.navlabel{white-space:nowrap;margin:0;padding:9px 10px;background:#1f2937}
+ main{padding:14px}.cards{grid-template-columns:repeat(2,1fr)}.split,.cols,.mgrid,.validation-lib{grid-template-columns:1fr}
+ .timeline-head{grid-template-columns:110px repeat(5,1fr)}.grow{grid-template-columns:110px 1fr}.glabel{font-size:11px}
+ .top{align-items:center}h1{font-size:24px}.panel{padding:13px;overflow:auto}
+ table{min-width:760px}
+}
+</style>
+</head>
+<body>
+
+<input class="tab-radio" type="radio" name="tabs" id="tab-overview" checked>
+<input class="tab-radio" type="radio" name="tabs" id="tab-gantt">
+<input class="tab-radio" type="radio" name="tabs" id="tab-features">
+<input class="tab-radio" type="radio" name="tabs" id="tab-validation">
+<input class="tab-radio" type="radio" name="tabs" id="tab-meetings">
+<input class="tab-radio" type="radio" name="tabs" id="tab-issues">
+
+<div class="app">
+<aside>
+  <div class="logo">PDM</div>
+  <div class="sub">Product Development Manager</div>
+  <div class="project">HL-GEN4</div>
+  <nav>
+    <label class="navlabel" for="tab-overview">Overview</label>
+    <label class="navlabel" for="tab-gantt">Gantt</label>
+    <label class="navlabel" for="tab-features">Features</label>
+    <label class="navlabel" for="tab-validation">Validation</label>
+    <label class="navlabel" for="tab-meetings">Meetings</label>
+    <label class="navlabel" for="tab-issues">Issues</label>
+  </nav>
+</aside>
+
+<main>
+<div class="top">
+  <div><div class="eyebrow">PRODUCT DEVELOPMENT</div><h1>HL-GEN4</h1></div>
+  <div class="badge">PARTIALLY RELEASED</div>
+</div>
+
+<section class="page" id="overview">
+  <div class="cards">
+    <div class="card"><span>Product readiness</span><b>29%</b><small>2 of 7 released</small></div>
+    <div class="card"><span>Released</span><b>2</b><small>Available now</small></div>
+    <div class="card"><span>In process</span><b>3</b><small>Development / validation</small></div>
+    <div class="card"><span>Planned</span><b>2</b><small>Roadmap</small></div>
+    <div class="card"><span>Validation</span><b>1 / 3</b><small>Tests complete</small></div>
+  </div>
+
+  <div class="panel">
+    <div class="panelhead"><div><h2>Development timeline</h2><p>Big-picture view. Tap Validation below to drill down.</p></div><label class="actionlabel secondary" for="tab-gantt">Open Gantt</label></div>
+    <div class="grow"><div class="glabel">Mechanical</div><div class="track"><div class="bar" style="left:0;width:34%"><span>88%</span></div></div></div>
+    <div class="grow"><div class="glabel">Optics</div><div class="track"><div class="bar" style="left:7%;width:31%"><span>72%</span></div></div></div>
+    <div class="grow"><div class="glabel">Electronics</div><div class="track"><div class="bar" style="left:15%;width:39%"><span>48%</span></div></div></div>
+    <div class="grow"><div class="glabel">Prototype</div><div class="track"><div class="bar" style="left:29%;width:26%"><span>35%</span></div></div></div>
+    <div class="grow"><label class="glabel actionlabel secondary" style="text-align:center" for="tab-validation">Validation</label><div class="track"><div class="bar" style="left:43%;width:34%"><span>28%</span></div></div></div>
+    <div class="grow"><div class="glabel">Certification</div><div class="track"><div class="bar" style="left:65%;width:23%"><span>0%</span></div></div></div>
+    <div class="grow"><div class="glabel">Production Release</div><div class="track"><div class="bar" style="left:82%;width:15%"><span>0%</span></div></div></div>
+  </div>
+
+  <div class="split">
+    <div class="panel">
+      <div class="panelhead"><div><h2>Feature readiness</h2><p>What is available now vs in development</p></div><label class="actionlabel secondary" for="tab-features">Open</label></div>
+      <div class="cols">
+        <div class="col"><h3>Available</h3><div class="item">✓ 120×120 optic</div><div class="item">✓ 30×90 optic</div></div>
+        <div class="col"><h3>In process</h3><div class="item">◐ 20×80 optic<div class="note">Validation</div></div><div class="item">◐ Outdoor bracket<div class="note">Prototype</div></div><div class="item">◐ DALI driver<div class="note">In Design</div></div></div>
+        <div class="col"><h3>Planned</h3><div class="item">○ Black finish</div><div class="item">○ Emergency option</div></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panelhead"><div><h2>Latest meeting</h2><p>2026-09-09</p></div><label class="actionlabel secondary" for="tab-meetings">Meeting log</label></div>
+      <b>Progress</b><p>120×120 optic released. Thermal sample preparation started.</p>
+      <b>Roadblock</b><p>150 mm extrusion delayed by supplier.</p>
+      <b>Next action</b><p>Confirm extrusion delivery and book IP/IK lab.</p>
+    </div>
+  </div>
+</section>
+
+<section class="page" id="gantt">
+  <div class="panel">
+    <div class="panelhead"><div><h2>Master Gantt</h2><p>Overall development schedule and milestones</p></div></div>
+    <div class="timeline-head"><div></div><div>Sep</div><div>Oct</div><div>Nov</div><div>Dec</div><div>Jan</div></div>
+    <div class="grow"><div class="glabel">Mechanical</div><div class="track"><div class="bar" style="left:0;width:34%"><span>On track</span></div></div></div>
+    <div class="grow"><div class="glabel">Optics</div><div class="track"><div class="bar" style="left:7%;width:31%"><span>At risk</span></div></div></div>
+    <div class="grow"><div class="glabel">Electronics</div><div class="track"><div class="bar" style="left:15%;width:39%"><span>On track</span></div></div></div>
+    <div class="grow"><div class="glabel">Prototype</div><div class="track"><div class="bar" style="left:29%;width:26%"><span>In progress</span></div></div></div>
+    <div class="grow"><label class="glabel actionlabel secondary" style="text-align:center" for="tab-validation">Validation</label><div class="track"><div class="bar" style="left:43%;width:34%"><span>At risk</span></div></div></div>
+    <div class="grow"><div class="glabel">Certification</div><div class="track"><div class="bar" style="left:65%;width:23%"><span>Not started</span></div></div></div>
+    <div class="grow"><div class="glabel">Production Release</div><div class="track"><div class="bar" style="left:82%;width:15%"><span>Not started</span></div></div></div>
+    <details><summary>Milestones</summary><div class="detailbody">◆ Design Freeze — Oct 15<br>◆ Prototype Approved — Nov 8<br>◆ Validation Complete — Dec 15<br>◆ Production Release — Jan 12</div></details>
+  </div>
+</section>
+
+<section class="page" id="features">
+  <div class="panel">
+    <div class="panelhead"><div><h2>Feature / Release Matrix</h2><p>Interactive demo: open each stage selector</p></div></div>
+    <table>
+      <thead><tr><th>Feature</th><th>Category</th><th>Current Stage</th><th>Target</th><th>Release Readiness</th></tr></thead>
+      <tbody>
+        <tr><td><b>120×120 optic</b></td><td>Optics</td><td><select><option selected>Released</option><option>Validation</option></select></td><td>Sep 2026</td><td><span class="pill green">Available</span></td></tr>
+        <tr><td><b>30×90 optic</b></td><td>Optics</td><td><select><option selected>Released</option><option>Validation</option></select></td><td>Sep 2026</td><td><span class="pill green">Available</span></td></tr>
+        <tr><td><b>20×80 optic</b></td><td>Optics</td><td><select><option>Prototype</option><option selected>Validation</option><option>Release Pending</option></select></td><td>Oct 2026</td><td><span class="pill yellow">In process</span></td></tr>
+        <tr><td><b>Outdoor bracket</b></td><td>Mounting</td><td><select><option>In Design</option><option selected>Prototype</option><option>Validation</option></select></td><td>Nov 2026</td><td><span class="pill yellow">In process</span></td></tr>
+        <tr><td><b>DALI driver</b></td><td>Electrical</td><td><select><option selected>In Design</option><option>Prototype</option></select></td><td>Nov 2026</td><td><span class="pill yellow">In process</span></td></tr>
+        <tr><td><b>Black finish</b></td><td>Finish</td><td><select><option selected>Planned</option><option>In Design</option></select></td><td>Jan 2027</td><td><span class="pill">Planned</span></td></tr>
+        <tr><td><b>Emergency option</b></td><td>Electrical</td><td><select><option selected>Planned</option><option>In Design</option></select></td><td>TBD</td><td><span class="pill">Planned</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="page" id="validation">
+  <div class="cards">
+    <div class="card"><span>Validation status</span><b>1 / 3</b><small>Completed tests</small></div>
+    <div class="card"><span>Open</span><b>2</b><small>Still active</small></div>
+    <div class="card"><span>Target completion</span><b>Dec 15</b><small>Current plan</small></div>
+  </div>
+
+  <div class="panel">
+    <div class="panelhead"><div><h2>Validation test library</h2><p>Select what this product needs</p></div></div>
+    <div class="validation-lib">
+      <label class="checkcard"><input type="checkbox" checked> Thermal</label>
+      <label class="checkcard"><input type="checkbox" checked> Photometric</label>
+      <label class="checkcard"><input type="checkbox" checked> IP Rating</label>
+      <label class="checkcard"><input type="checkbox"> IK Impact</label>
+      <label class="checkcard"><input type="checkbox"> EMC</label>
+      <label class="checkcard"><input type="checkbox"> Electrical Safety</label>
+      <label class="checkcard"><input type="checkbox"> Salt Spray</label>
+      <label class="checkcard"><input type="checkbox"> Vibration</label>
+      <label class="checkcard"><input type="checkbox"> UV Exposure</label>
+    </div>
+
+    <table>
+      <thead><tr><th>Test</th><th>Owner</th><th>Sample Due</th><th>Test Date</th><th>Result Due</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td><b>Thermal</b></td><td><input value="Alex"></td><td><input type="date" value="2026-10-10"></td><td><input type="date" value="2026-10-14"></td><td><input type="date" value="2026-10-17"></td><td><select><option>Planned</option><option selected>Waiting</option><option>In Progress</option><option>Complete</option></select></td></tr>
+        <tr><td><b>Photometric</b></td><td><input value="Optics"></td><td><input type="date" value="2026-10-05"></td><td><input type="date" value="2026-10-07"></td><td><input type="date" value="2026-10-08"></td><td><select><option>Planned</option><option>Waiting</option><option>In Progress</option><option selected>Complete</option></select></td></tr>
+        <tr><td><b>IP Rating</b></td><td><input value="External Lab"></td><td><input type="date" value="2026-10-20"></td><td><input type="date" value="2026-10-24"></td><td><input type="date" value="2026-10-27"></td><td><select><option selected>Planned</option><option>Waiting</option><option>In Progress</option><option>Complete</option></select></td></tr>
+      </tbody>
+    </table>
+
+    <details open><summary>Thermal — detail</summary><div class="detailbody">
+      Requirement: Ta ≤ 50°C<br>
+      Prototype: P3<br>
+      Configuration: HL-G4 300 mm / 4000K / 48 W<br>
+      Result: Waiting for test<br>
+      Notes: LED board and driver temperatures to be recorded.
+    </div></details>
+  </div>
+</section>
+
+<section class="page" id="meetings">
+  <div class="panel">
+    <div class="panelhead"><div><h2>Development Meeting Log</h2><p>Each meeting stays as a historical entry</p></div></div>
+
+    <details open><summary>September 9, 2026 — Weekly Development Meeting</summary>
+      <div class="detailbody">
+        <div class="mgrid">
+          <div><b>Progress</b><p>120×120 optic released. Thermal sample preparation started.</p></div>
+          <div><b>Roadblocks</b><p>150 mm extrusion delayed by supplier.</p></div>
+          <div><b>Decisions</b><p>Keep double-vent housing. Use same prototype for IP and IK.</p></div>
+        </div>
+        <table>
+          <thead><tr><th>Action</th><th>Owner</th><th>Due</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>Confirm extrusion delivery</td><td>Mike</td><td>Sep 11</td><td><span class="pill red">Open</span></td></tr>
+            <tr><td>Book IP/IK lab</td><td>Sarah</td><td>Sep 16</td><td><span class="pill red">Open</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </details>
+
+    <details><summary>September 2, 2026 — Weekly Development Meeting</summary><div class="detailbody">Previous meeting entry remains available here. This is how the permanent development history would work.</div></details>
+  </div>
+</section>
+
+<section class="page" id="issues">
+  <div class="panel">
+    <div class="panelhead"><div><h2>Issues & Roadblocks</h2><p>Product-development blocker register</p></div></div>
+    <table>
+      <thead><tr><th>ID</th><th>Issue</th><th>Area</th><th>Owner</th><th>Severity</th><th>Status</th><th>Target</th></tr></thead>
+      <tbody>
+        <tr><td>HLG4-018</td><td>150 mm extrusion supplier delay</td><td>Mechanical</td><td>Mike</td><td><span class="pill red">High</span></td><td><span class="pill red">Open</span></td><td>Sep 11</td></tr>
+        <tr><td>HLG4-019</td><td>Driver revision required before EMC sample build</td><td>Electrical</td><td>Alex</td><td><span class="pill yellow">Medium</span></td><td><span class="pill red">Open</span></td><td>Sep 18</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+</main>
+</div>
+</body>
+</html>
